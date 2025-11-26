@@ -6,8 +6,6 @@ import { LoginSchema } from "../../lib/schemas";
 import { AuthTexts } from "../../constants/auth";
 import { StorageService } from "../../lib/storage";
 
-type CustomRoute = "/(home)/Settings";
-
 export default function LoginScreen() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState<Partial<Record<keyof typeof form, string>>>({});
@@ -19,6 +17,7 @@ export default function LoginScreen() {
     setIsLoading(true);
 
     try {
+      // Validar formulario con Zod
       const result = LoginSchema.safeParse(form);
       
       if (!result.success) {
@@ -31,6 +30,9 @@ export default function LoginScreen() {
         return;
       }
 
+      console.log("🔐 Iniciando sesión...");
+
+      // Verificar credenciales
       const user = await StorageService.verifyLogin(form.email, form.password);
 
       if (!user) {
@@ -49,13 +51,17 @@ export default function LoginScreen() {
         return;
       }
 
+      // Guardar sesión
       await StorageService.setCurrentUser(user);
+      
+      console.log("✅ Login exitoso, redirigiendo a home...");
 
-      const path: CustomRoute = "/(home)/Settings";
-      router.push(path);
+      // 🔥 CAMBIO IMPORTANTE: Redirigir a la pantalla principal de tareas
+      router.replace("/(home)/Dashboard");
+      
     } catch (error) {
       Alert.alert("Error", "Hubo un problema al iniciar sesión.");
-      console.error(error);
+      console.error("❌ Error en login:", error);
     } finally {
       setIsLoading(false);
     }
@@ -120,7 +126,7 @@ export default function LoginScreen() {
 
             <View className="mt-6">
               <Text className="text-center text-gray-600">
-                {AuthTexts.NO_ACCOUNT}
+                {AuthTexts.NO_ACCOUNT}{" "}
                 <Link href="/(auth)/Register" className="text-blue-600 font-semibold">
                   {AuthTexts.SIGN_UP}
                 </Link>

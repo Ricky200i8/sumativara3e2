@@ -12,13 +12,15 @@ export default function TaskItem({ task }: { task: Task }) {
       <Text className="text-gray-600">{task.description}</Text>
 
       <View className="flex-row gap-4 mt-2">
-        <Link
-          href={{ pathname: "/(home)/edit/[id]", params: { id: String(task.id) }
-        }}
-          className="text-blue-600"
-        >
-          Editar
-        </Link>
+      <Link 
+  href={{
+    pathname: "/(home)/edit/[id]",
+    params: { id: String(task.id) }
+  }}
+>
+  <Text>Editar</Text>
+</Link>
+
 
         <Pressable onPress={() => deleteTask(task.id!)}>
           <Text className="text-red-500">Eliminar</Text>

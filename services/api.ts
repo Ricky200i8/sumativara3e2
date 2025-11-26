@@ -1,38 +1,54 @@
-export const API_URL = "192.168.45.211:3000";
+import axios from "axios";
+
+export const API_URL =
+  "https://3000-firebase-sumativara3e2-1763406693823.cluster-ocv3ypmyqfbqysslgd7zlhmxek.cloudworkstations.dev/tasks";
 
 export interface Task {
   id?: number;
   title: string;
   description: string;
   completed: boolean;
-  userEmail: string; // Para filtrar tareas por usuario logueado
+  userEmail: string;
 }
 
 export const TaskAPI = {
   async getTasks(email: string): Promise<Task[]> {
-    const res = await fetch(`${API_URL}/tasks?userEmail=${email}`);
-    return res.json();
+    try {
+      const res = await axios.get(API_URL, {
+        params: { userEmail: email },
+      });
+      return res.data;
+    } catch (error) {
+      console.error("Error al obtener tareas:", error);
+      return [];
+    }
   },
 
   async createTask(task: Task): Promise<Task> {
-    const res = await fetch(`${API_URL}/tasks`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(task),
-    });
-    return res.json();
+    try {
+      const res = await axios.post(API_URL, task);
+      return res.data;
+    } catch (error) {
+      console.error("Error creando tarea:", error);
+      throw error;
+    }
   },
 
   async updateTask(id: number, task: Task): Promise<Task> {
-    const res = await fetch(`${API_URL}/tasks/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(task),
-    });
-    return res.json();
+    try {
+      const res = await axios.put(`${API_URL}/${id}`, task);
+      return res.data;
+    } catch (error) {
+      console.error("Error actualizando tarea:", error);
+      throw error;
+    }
   },
 
   async deleteTask(id: number): Promise<void> {
-    await fetch(`${API_URL}/tasks/${id}`, { method: "DELETE" });
+    try {
+      await axios.delete(`${API_URL}/${id}`);
+    } catch (error) {
+      console.error("Error eliminando tarea:", error);
+    }
   },
 };
