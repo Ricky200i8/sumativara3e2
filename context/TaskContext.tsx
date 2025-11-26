@@ -1,66 +1,65 @@
-// context/TaskContext.tsx
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Task } from '@/types/task';
-import { taskApi } from '@/services/api';
-import { useAuth } from '@/context/AuthContext'; // asumiendo que tienes uno
+import { createContext, useContext, useEffect, useState } from "react";
+import { Task, TaskAPI } from "../services/api";
+import { StorageService } from "../lib/storage";
 
-type TaskContextType = {
+interface TasksContextType {
   tasks: Task[];
-  loading: boolean;
-  addTask: (task: Omit<Task, "id">) => Promise<void>;
-  updateTask: (id: number, task: Partial<Task>) => Promise<void>;
+  loadTasks: () => Promise<void>;
+  addTask: (task: Task) => Promise<void>;
+  updateTask: (id: number, task: Task) => Promise<void>;
   deleteTask: (id: number) => Promise<void>;
-  refreshTasks: () => Promise<void>;
-};
+}
 
-const TaskContext = createContext<TaskContextType | undefined>(undefined);
-
-export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { user } = useAuth(); // tu contexto de auth
-
-  const refreshTasks = async () => {
-    if (!user) return;
-    setLoading(true);
-    try {
-      const data = await taskApi.getAll(user.id);
-      setTasks(data.sort((a, b) => b.id - a.id)); // más nuevas primero
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    refreshTasks();
-  }, [user]);
-
-  const addTask = async (task: Omit<Task, "id">) => {
-    const newTask = await taskApi.create(task);
-    setTasks(prev => [newTask, ...prev]);
-  };
-
-  const updateTask = async (id: number, changes: Partial<Task>) => {
-    const updated = await taskApi.update(id, changes);
-    setTasks(prev => prev.map(t => t.id === id ? updated : t));
-  };
-
-  const deleteTask = async (id: number) => {
-    await taskApi.delete(id);
-    setTasks(prev => prev.filter(t => t.id !== id));
-  };
-
-  return (
-    <TaskContext.Provider value={{ tasks, loading, addTask, updateTask, deleteTask, refreshTasks }}>
-      {children}
-    </TaskContext.Provider>
-  );
-};
+const TasksContext = createContext<TasksContextType | null>(null);
 
 export const useTasks = () => {
-  const context = useContext(TaskContext);
-  if (!context) throw new Error("useTasks debe usarse dentro de TaskProvider");
-  return context;
+  const ctx = useContext(TasksContext);
+  if (!ctx) throw new Error("useTasks must be inside Provider");
+  return ctx;
+};
+
+export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [email, setEmail] = useState("");
+
+  // Obtener usuario
+  useEffect(() => {
+    const fetchUser = async () => {
+      const u = await StorageService.getCurrentUser();
+      if (u?.email) setEmail(u.email);
+    };
+    fetchUser();
+  }, []);
+
+  // Cargar tareas SOLO cuando email esté listo
+  useEffect(() => {
+    if (email) {
+      loadTasks();
+    }
+  }, [email]);
+
+  async function loadTasks() {
+    if (!email) return;
+    const data = await TaskAPI.getTasks(email);
+    setTasks(data);
+  }
+
+  async function addTask(task: Task) {
+    const newTask = await TaskAPI.createTask(task);
+    setTasks((prev) => [...prev, newTask]);
+  }
+
+  async function updateTask(id: number, task: Task) {
+    const updated = await TaskAPI.updateTask(id, task);
+    setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
+  }
+
+  async function deleteTask(id: number) {
+    await TaskAPI.deleteTask(id);
+    setTasks((prev) => prev.filter((t) => t.id !== id));
+  }
+
+  const value = { tasks, loadTasks, addTask, updateTask, deleteTask };
+
+  return <TasksContext.Provider value={value}>{children}</TasksContext.Provider>;
 };

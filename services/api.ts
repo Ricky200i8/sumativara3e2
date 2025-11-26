@@ -1,17 +1,20 @@
-// services/api.ts
-import { Task } from '@/types/task';
+export const API_URL = "192.168.45.211:3000";
 
-const API_URL = __DEV__ 
-  ? "http://192.168.1.50:3000"  // Cambia por tu IP
-  : "3000-firebase-sumativara3e2-1763406693823.cluster-ocv3ypmyqfbqysslgd7zlhmxek.cloudworkstations.dev";
+export interface Task {
+  id?: number;
+  title: string;
+  description: string;
+  completed: boolean;
+  userEmail: string; // Para filtrar tareas por usuario logueado
+}
 
-export const taskApi = {
-  getAll: async (userId: number): Promise<Task[]> => {
-    const res = await fetch(`${API_URL}/tasks?userId=${userId}`);
+export const TaskAPI = {
+  async getTasks(email: string): Promise<Task[]> {
+    const res = await fetch(`${API_URL}/tasks?userEmail=${email}`);
     return res.json();
   },
 
-  create: async (task: Omit<Task, "id">): Promise<Task> => {
+  async createTask(task: Task): Promise<Task> {
     const res = await fetch(`${API_URL}/tasks`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -20,7 +23,7 @@ export const taskApi = {
     return res.json();
   },
 
-  update: async (id: number, task: Partial<Task>): Promise<Task> => {
+  async updateTask(id: number, task: Task): Promise<Task> {
     const res = await fetch(`${API_URL}/tasks/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -29,7 +32,7 @@ export const taskApi = {
     return res.json();
   },
 
-  delete: async (id: number): Promise<void> => {
+  async deleteTask(id: number): Promise<void> {
     await fetch(`${API_URL}/tasks/${id}`, { method: "DELETE" });
   },
 };

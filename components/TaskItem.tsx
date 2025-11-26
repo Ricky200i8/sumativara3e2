@@ -1,26 +1,29 @@
-import { Pressable, View, Text, CheckBox } from 'react-native';
-import { Link } from 'expo-router';
-import { useTasks } from '@/context/TaskContext';
+import { View, Text, Pressable } from "react-native";
+import { Link } from "expo-router";
+import { Task } from "@/services/api";
+import { useTasks } from "@/context/TaskContext";
 
 export default function TaskItem({ task }: { task: Task }) {
-  const { updateTask } = useTasks();
+  const { deleteTask } = useTasks();
 
   return (
-    <Link href={`/task/${task.id}`} asChild>
-      <Pressable className="bg-white p-4 mx-4 my-2 rounded-lg shadow">
-        <View className="flex-row items-center justify-between">
-          <View className="flex-1">
-            <Text className={`text-lg font-semibold ${task.completed ? 'line-through text-gray-400' : ''}`}>
-              {task.title}
-            </Text>
-            {task.description ? <Text className="text-gray-600 mt-1">{task.description}</Text> : null}
-          </View>
-          <CheckBox
-            value={task.completed}
-            onValueChange={() => updateTask(task.id, { completed: !task.completed })}
-          />
-        </View>
-      </Pressable>
-    </Link>
+    <View className="p-4 bg-gray-100 mb-3 rounded-xl">
+      <Text className="text-lg font-semibold">{task.title}</Text>
+      <Text className="text-gray-600">{task.description}</Text>
+
+      <View className="flex-row gap-4 mt-2">
+        <Link
+          href={{ pathname: "/(home)/edit/[id]", params: { id: String(task.id) }
+        }}
+          className="text-blue-600"
+        >
+          Editar
+        </Link>
+
+        <Pressable onPress={() => deleteTask(task.id!)}>
+          <Text className="text-red-500">Eliminar</Text>
+        </Pressable>
+      </View>
+    </View>
   );
 }

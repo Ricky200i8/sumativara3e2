@@ -1,12 +1,10 @@
 import { Stack } from "expo-router";
-import "@/global.css";
+import { TasksProvider } from "../context/TaskContext";
 
-export default function Layout() {
+export default function RootLayout() {
   return (
-    <Stack>
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="(auth)/Login" options={{ headerShown: false }} />
-      <Stack.Screen name="(auth)/Register" options={{ headerShown: false }} />
-    </Stack>
+    <TasksProvider>
+      <Stack screenOptions={{ headerShown: false }} />
+    </TasksProvider>
   );
 }

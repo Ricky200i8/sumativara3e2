@@ -1,34 +1,43 @@
-import { View, Text, FlatList, RefreshControl } from 'react-native';
-import { Link } from 'expo-router';
-import { useTasks } from '@/context/TaskContext';
-import TaskItem from '@/components/TaskItem';
-import EmptyState from '@/components/EmptyState';
-import { Plus } from 'lucide-react-native';
+import { View, Text, FlatList, Pressable } from "react-native";
+import { Link, useRouter } from "expo-router";
+import { useTasks } from "@/context/TaskContext";
+import TaskItem from "@/components/TaskItem";
+import { useEffect } from "react";
 
 export default function HomeScreen() {
-  const { tasks, loading, refreshTasks } = useTasks();
-
+  const { tasks, loadTasks } = useTasks();
+  const router = useRouter();
+  useEffect(() => {
+    console.log("🔵 HomeScreen montado, cargando tareas...");
+    loadTasks();
+  }, []);
+  console.log("📌 Tareas actuales:", tasks);
+  
   return (
-    <View className="flex-1 bg-gray-100">
+    <View className="flex-1 bg-white p-5">
+      <View className="flex-row justify-between mb-4">
+        <Text className="text-2xl font-bold">Mis Tareas</Text>
+
+        <Link
+          href="/(home)/create"
+          className="bg-blue-600 text-white px-4 py-2 rounded-xl"
+        >
+          + Nueva
+        </Link>
+      </View>
+
       <FlatList
         data={tasks}
-        keyExtractor={(item) => item.id.toString()}
-        refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={refreshTasks} />
-        }
-        ListEmptyComponent={<EmptyState />}
-        contentContainerClassName="pb-24 pt-4"
+        onRefresh={loadTasks}
+        refreshing={false}
+        keyExtractor={(item) => item.id!.toString()}
         renderItem={({ item }) => <TaskItem task={item} />}
+        ListEmptyComponent={
+          <Text className="text-center text-gray-500 mt-10">
+            No tienes tareas aún.
+          </Text>
+        }
       />
-
-      {/* FAB - Botón flotante */}
-      <Link href="/(tabs)/add" asChild>
-        <View className="absolute bottom-8 right-6">
-          <View className="bg-blue-600 rounded-full p-5 shadow-2xl">
-            <Plus color="white" size={32} />
-          </View>
-        </View>
-      </Link>
     </View>
   );
 }
