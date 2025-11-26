@@ -1,12 +1,12 @@
-import React from 'react'
-import { Tabs } from 'expo-router'
+import { Stack } from "expo-router";
+import "@/global.css";
 
-const HomeLayout = () => {
+export default function Layout() {
   return (
-    <Tabs>
-
-    </Tabs>
-  )
+    <Stack>
+      <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="(auth)/Login" options={{ headerShown: false }} />
+      <Stack.Screen name="(auth)/Register" options={{ headerShown: false }} />
+    </Stack>
+  );
 }
-
-export default HomeLayout

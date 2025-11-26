@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { View, Text, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
 import { StorageService } from "../lib/storage";
+import "@/global.css";
 
 export default function Index() {
   const router = useRouter();
