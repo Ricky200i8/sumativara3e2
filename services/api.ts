@@ -2,13 +2,23 @@ import axios from "axios";
 
 export const API_URL =
   "https://3000-firebase-sumativara3e2-1763406693823.cluster-ocv3ypmyqfbqysslgd7zlhmxek.cloudworkstations.dev/tasks";
+export const USERS_URL =
+  "https://3000-firebase-sumativara3e2-1763406693823.cluster-ocv3ypmyqfbqysslgd7zlhmxek.cloudworkstations.dev/users";
 
 export interface Task {
-  id?: string | number; // Acepta tanto string como number
+  id?: string | number;
   title: string;
   description: string;
   completed: boolean;
   userEmail: string;
+}
+
+export interface User {
+  id?: string | number;
+  name: string;
+  email: string;
+  password: string;
+  createdAt?: string;
 }
 
 export const TaskAPI = {
@@ -84,4 +94,76 @@ export const TaskAPI = {
       throw error;
     }
   },
+};
+
+// API de Usuarios
+export const UserAPI = {
+  async register(user: Omit<User, 'id' | 'createdAt'>): Promise<User> {
+    try {
+      console.log('📝 Registrando usuario:', user.email);
+      
+      // Verificar si el email ya existe
+      const existingUsers = await axios.get(USERS_URL, {
+        params: { email: user.email }
+      });
+
+      if (existingUsers.data.length > 0) {
+        throw new Error('EMAIL_EXISTS');
+      }
+
+      // Crear usuario
+      const newUser = {
+        ...user,
+        createdAt: new Date().toISOString()
+      };
+
+      const res = await axios.post(USERS_URL, newUser);
+      console.log('✅ Usuario registrado:', res.data);
+      return res.data;
+    } catch (error) {
+      console.error('❌ Error registrando usuario:', error);
+      throw error;
+    }
+  },
+
+  async login(email: string, password: string): Promise<User | null> {
+    try {
+      console.log('🔐 Intentando login:', email);
+      
+      const res = await axios.get(USERS_URL, {
+        params: { email }
+      });
+
+      if (res.data.length === 0) {
+        console.log('❌ Usuario no encontrado');
+        return null;
+      }
+
+      const user = res.data[0];
+      
+      if (user.password !== password) {
+        console.log('❌ Contraseña incorrecta');
+        return null;
+      }
+
+      console.log('✅ Login exitoso');
+      return user;
+    } catch (error) {
+      console.error('❌ Error en login:', error);
+      return null;
+    }
+  },
+
+  async getUserByEmail(email: string): Promise<User | null> {
+    try {
+      const res = await axios.get(USERS_URL, {
+        params: { email }
+      });
+
+      return res.data.length > 0 ? res.data[0] : null;
+    } catch (error) {
+      console.error('❌ Error obteniendo usuario:', error);
+      return null;
+    }
+  }
 };

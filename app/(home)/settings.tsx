@@ -1,14 +1,38 @@
-import { View, Text, Pressable, SafeAreaView } from "react-native";
+import { View, Text, Pressable, SafeAreaView, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { StorageService } from "@/lib/storage";
+import { useTasks } from "@/context/TaskContext";
 import { UserCircle, Palette, Info, LogOut, ChevronRight } from "lucide-react-native";
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const { userEmail } = useTasks();
 
   const handleLogout = async () => {
-    await StorageService.logout();
-    router.replace("/");
+    Alert.alert(
+      "Cerrar Sesión",
+      "¿Estás seguro de que deseas cerrar sesión?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Cerrar Sesión",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              console.log("🚪 Cerrando sesión...");
+              await StorageService.logout();
+              console.log("✅ Sesión cerrada");
+              
+              // Redirigir al login
+              router.replace("/(auth)/Login");
+            } catch (error) {
+              console.error("❌ Error cerrando sesión:", error);
+              Alert.alert("Error", "Hubo un problema al cerrar sesión");
+            }
+          }
+        }
+      ]
+    );
   };
 
   const SettingsButton = ({ 
@@ -35,9 +59,18 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       <View className="flex-1 p-6">
-        <Text className="text-3xl font-bold mb-6 text-gray-900">
+        <Text className="text-3xl font-bold mb-2 text-gray-900">
           Configuración
         </Text>
+        
+        {userEmail && (
+          <View className="mb-6 p-4 bg-gray-100 rounded-lg">
+            <Text className="text-sm text-gray-500">Sesión activa</Text>
+            <Text className="text-base text-gray-900 font-semibold mt-1">
+              {userEmail}
+            </Text>
+          </View>
+        )}
 
         <View className="mb-6">
           <SettingsButton

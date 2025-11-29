@@ -1,18 +1,26 @@
 {
-  "tasks": [
+  "users": [
     {
-      "id": "625d",
-      "title": "Sd",
-      "description": "Aa",
-      "completed": false,
-      "userEmail": "a@gmail.com"
+      "id": "8470",
+      "name": "a",
+      "email": "arias@gmail.com",
+      "password": "Xz4WkCHngBMuRNS",
+      "createdAt": "2025-11-29T06:10:00.359Z"
     },
     {
-      "title": "s",
-      "description": "s",
-      "completed": false,
-      "userEmail": "as@gmail.com",
-      "id": "4f49"
+      "id": "0c80",
+      "name": "a",
+      "email": "a@gmail.com",
+      "password": "Pucho1234",
+      "createdAt": "2025-11-29T06:11:23.910Z"
+    },
+    {
+      "id": "d912",
+      "name": "A",
+      "email": "m@gmail.com",
+      "password": "Tuco1111",
+      "createdAt": "2025-11-29T06:12:59.831Z"
     }
-  ]
+  ],
+  "tasks": []
 }

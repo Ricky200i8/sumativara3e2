@@ -1,97 +1,41 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { User } from '../services/api';
 
-const USERS_KEY = '@zod_users';
-const CURRENT_USER_KEY = '@zod_current_user';
-
-export interface User {
-  name: string;
-  email: string;
-  password: string;
-}
+const CURRENT_USER_KEY = '@current_user';
 
 export const StorageService = {
-  // Guardar nuevo usuario
-  async saveUser(user: User): Promise<boolean> {
-    try {
-      console.log('💾 Intentando guardar usuario:', user.email);
-      const existingUsers = await this.getUsers();
-      
-      // Verificar si el email ya existe
-      if (existingUsers.some(u => u.email === user.email)) {
-        console.warn('⚠️ El usuario ya existe:', user.email);
-        return false;
-      }
-      
-      const updatedUsers = [...existingUsers, user];
-      await AsyncStorage.setItem(USERS_KEY, JSON.stringify(updatedUsers));
-      console.log('✅ Usuario guardado exitosamente');
-      return true;
-    } catch (error) {
-      console.error('❌ Error saving user:', error);
-      return false;
-    }
-  },
-
-  // Obtener todos los usuarios
-  async getUsers(): Promise<User[]> {
-    try {
-      const usersJson = await AsyncStorage.getItem(USERS_KEY);
-      const users = usersJson ? JSON.parse(usersJson) : [];
-      console.log(`📋 Total de usuarios registrados: ${users.length}`);
-      return users;
-    } catch (error) {
-      console.error('❌ Error getting users:', error);
-      return [];
-    }
-  },
-
-  // Verificar credenciales de login
-  async verifyLogin(email: string, password: string): Promise<User | null> {
-    try {
-      console.log('🔐 Verificando login para:', email);
-      const users = await this.getUsers();
-      const user = users.find(u => u.email === email && u.password === password);
-      
-      if (user) {
-        console.log('✅ Credenciales válidas');
-      } else {
-        console.warn('⚠️ Credenciales inválidas');
-      }
-      
-      return user || null;
-    } catch (error) {
-      console.error('❌ Error verifying login:', error);
-      return null;
-    }
-  },
-
-  // Guardar sesión actual
+  // Guardar usuario actual en sesión
   async setCurrentUser(user: User): Promise<void> {
     try {
-      console.log('💾 Guardando sesión para:', user.email);
-      await AsyncStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
-      console.log('✅ Sesión guardada correctamente');
+      const userData = JSON.stringify({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        // NO guardar password en AsyncStorage por seguridad
+      });
+      await AsyncStorage.setItem(CURRENT_USER_KEY, userData);
+      console.log('✅ Sesión guardada:', user.email);
     } catch (error) {
-      console.error('❌ Error setting current user:', error);
+      console.error('❌ Error guardando sesión:', error);
+      throw error;
     }
   },
 
   // Obtener usuario actual
   async getCurrentUser(): Promise<User | null> {
     try {
-      console.log('🔍 Buscando usuario actual...');
-      const userJson = await AsyncStorage.getItem(CURRENT_USER_KEY);
+      const userData = await AsyncStorage.getItem(CURRENT_USER_KEY);
       
-      if (userJson) {
-        const user = JSON.parse(userJson);
-        console.log('✅ Usuario actual encontrado:', user.email);
-        return user;
+      if (!userData) {
+        console.log('⚠️ No hay sesión activa');
+        return null;
       }
-      
-      console.warn('⚠️ No hay usuario logueado');
-      return null;
+
+      const user = JSON.parse(userData);
+      console.log('✅ Sesión recuperada:', user.email);
+      return user;
     } catch (error) {
-      console.error('❌ Error getting current user:', error);
+      console.error('❌ Error obteniendo sesión:', error);
       return null;
     }
   },
@@ -99,32 +43,21 @@ export const StorageService = {
   // Cerrar sesión
   async logout(): Promise<void> {
     try {
-      console.log('🚪 Cerrando sesión...');
       await AsyncStorage.removeItem(CURRENT_USER_KEY);
       console.log('✅ Sesión cerrada');
     } catch (error) {
-      console.error('❌ Error logging out:', error);
-    }
-  },
-
-  // Limpiar todo (útil para desarrollo)
-  async clearAll(): Promise<void> {
-    try {
-      console.log('🗑️ Limpiando todo el almacenamiento...');
-      await AsyncStorage.multiRemove([USERS_KEY, CURRENT_USER_KEY]);
-      console.log('✅ Almacenamiento limpiado');
-    } catch (error) {
-      console.error('❌ Error clearing storage:', error);
+      console.error('❌ Error cerrando sesión:', error);
+      throw error;
     }
   },
 
   // Verificar si hay sesión activa
-  async isLoggedIn(): Promise<boolean> {
+  async hasActiveSession(): Promise<boolean> {
     try {
-      const user = await this.getCurrentUser();
-      return user !== null;
+      const userData = await AsyncStorage.getItem(CURRENT_USER_KEY);
+      return userData !== null;
     } catch (error) {
-      console.error('❌ Error checking login status:', error);
+      console.error('❌ Error verificando sesión:', error);
       return false;
     }
   }

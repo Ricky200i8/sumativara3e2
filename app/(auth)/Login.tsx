@@ -16,6 +16,7 @@ import CustomInput from "@/components/CustomImput";
 import { LoginSchema } from "../../lib/schemas";
 import { AuthTexts } from "../../constants/auth";
 import { StorageService } from "../../lib/storage";
+import { UserAPI } from "../../services/api";
 
 export default function LoginScreen() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -40,7 +41,10 @@ export default function LoginScreen() {
         return;
       }
 
-      const user = await StorageService.verifyLogin(form.email, form.password);
+      console.log("🔐 Iniciando sesión...");
+
+      // Verificar credenciales en JSON Server
+      const user = await UserAPI.login(form.email, form.password);
       
       if (!user) {
         Alert.alert(
@@ -55,11 +59,15 @@ export default function LoginScreen() {
         return;
       }
 
+      // Guardar sesión localmente
       await StorageService.setCurrentUser(user);
+      console.log("✅ Login exitoso, redirigiendo a home...");
+
+      // Redirigir al dashboard
       router.replace("/(home)/dashboard");
     } catch (error) {
       Alert.alert("Error", "Hubo un problema al iniciar sesión.");
-      console.error("Error en login:", error);
+      console.error("❌ Error en login:", error);
     } finally {
       setIsLoading(false);
     }

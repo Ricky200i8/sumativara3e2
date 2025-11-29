@@ -35,9 +35,15 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
         setEmail(u.email);
       } else {
         console.warn("⚠️ No hay usuario logueado");
+        setEmail(""); // Limpiar el email si no hay usuario
+        setTasks([]); // Limpiar las tareas
       }
     };
     fetchUser();
+
+    // Recargar el usuario cada vez que la app se enfoca
+    const interval = setInterval(fetchUser, 1000);
+    return () => clearInterval(interval);
   }, []);
 
   const loadTasks = useCallback(async () => {
