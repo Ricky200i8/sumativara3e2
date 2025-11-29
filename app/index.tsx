@@ -18,7 +18,7 @@ export default function Index() {
       const currentUser = await StorageService.getCurrentUser();
       
       if (currentUser) {
-        router.replace("/(home)/Settings");
+        router.replace("/(home)/dashboard");
       } else {
         router.replace("/(auth)/Login");
       }

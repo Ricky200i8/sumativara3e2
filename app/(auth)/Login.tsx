@@ -57,7 +57,7 @@ export default function LoginScreen() {
       console.log("✅ Login exitoso, redirigiendo a home...");
 
       // 🔥 CAMBIO IMPORTANTE: Redirigir a la pantalla principal de tareas
-      router.replace("/(home)/Dashboard");
+      router.replace("/(home)/dashboard");
       
     } catch (error) {
       Alert.alert("Error", "Hubo un problema al iniciar sesión.");

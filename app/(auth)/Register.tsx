@@ -6,7 +6,7 @@ import { RegisterSchema } from "../../lib/schemas";
 import { AuthTexts } from "../../constants/auth";
 import { StorageService } from "../../lib/storage";
 
-type CustomRoute = "/(home)/Dashboard";
+type CustomRoute = "/(home)/dashboard";
 
 export default function RegisterScreen() {
   const [form, setForm] = useState({
@@ -57,7 +57,7 @@ export default function RegisterScreen() {
         return;
       }
 
-      const path: CustomRoute = "/(home)/Dashboard";
+      const path: CustomRoute = "/(home)/dashboard";
       router.push(path);
     } catch (error) {
       Alert.alert("Error", "Hubo un problema al registrar tu cuenta.");
