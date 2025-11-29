@@ -25,40 +25,36 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  // Obtener usuario al montar el componente
   useEffect(() => {
     const fetchUser = async () => {
-      console.log("🔐 Obteniendo usuario actual...");
       const u = await StorageService.getCurrentUser();
       
       if (u?.email) {
         console.log(`✅ Usuario encontrado: ${u.email}`);
         setEmail(u.email);
       } else {
-        console.warn("⚠️ No hay usuario logueado");
-        setEmail(""); // Limpiar el email si no hay usuario
-        setTasks([]); // Limpiar las tareas
+        // Solo mostrar warning si se esperaba un usuario
+        if (email) {
+          console.warn("⚠️ No hay usuario logueado");
+        }
+        setEmail("");
+        setTasks([]);
       }
     };
+    
     fetchUser();
-
-    // Recargar el usuario cada vez que la app se enfoca
-    const interval = setInterval(fetchUser, 1000);
-    return () => clearInterval(interval);
-  }, []);
+  }, []); // Solo ejecutar al montar
 
   const loadTasks = useCallback(async () => {
     if (!email) {
-      console.warn("⚠️ No se puede cargar tareas sin email");
-      return;
+      return; // Silencioso si no hay email
     }
 
     setIsLoading(true);
-    console.log(`🔄 Cargando tareas para: ${email}`);
     
     try {
       const data = await TaskAPI.getTasks(email);
-      console.log(`✅ ${data.length} tareas cargadas`);
-      console.log('📋 IDs de tareas:', data.map(t => ({ id: t.id, type: typeof t.id })));
       setTasks(data);
     } catch (error) {
       console.error("❌ Error al cargar tareas:", error);
@@ -84,7 +80,6 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
       const taskWithEmail = { ...task, userEmail: email };
       const newTask = await TaskAPI.createTask(taskWithEmail);
       setTasks((prev) => [...prev, newTask]);
-      console.log("✅ Tarea agregada al estado local");
     } catch (error) {
       console.error("❌ Error al agregar tarea:", error);
       throw error;
@@ -93,10 +88,8 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
 
   async function updateTask(id: string | number, task: Task) {
     try {
-      console.log('🔄 Context: Actualizando tarea con ID:', id, 'tipo:', typeof id);
       const updated = await TaskAPI.updateTask(id, task);
       setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
-      console.log("✅ Tarea actualizada en el estado local");
     } catch (error) {
       console.error("❌ Error al actualizar tarea:", error);
       throw error;
@@ -107,7 +100,6 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       await TaskAPI.deleteTask(id);
       setTasks((prev) => prev.filter((t) => t.id !== id));
-      console.log("✅ Tarea eliminada del estado local");
     } catch (error) {
       console.error("❌ Error al eliminar tarea:", error);
       throw error;

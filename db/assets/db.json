@@ -20,7 +20,29 @@
       "email": "m@gmail.com",
       "password": "Tuco1111",
       "createdAt": "2025-11-29T06:12:59.831Z"
+    },
+    {
+      "id": "ab7a",
+      "name": "Jaja",
+      "email": "ja@gmail.com",
+      "password": "Pepe1111",
+      "createdAt": "2025-11-29T06:32:44.009Z"
     }
   ],
-  "tasks": []
+  "tasks": [
+    {
+      "id": "edf6",
+      "title": "Hola",
+      "description": "O",
+      "completed": false,
+      "userEmail": "ja@gmail.com"
+    },
+    {
+      "id": "24f1",
+      "title": "Aha",
+      "description": "Ah",
+      "completed": false,
+      "userEmail": "m@gmail.com"
+    }
+  ]
 }
