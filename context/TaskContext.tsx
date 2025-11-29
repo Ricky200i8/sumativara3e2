@@ -6,8 +6,8 @@ interface TasksContextType {
   tasks: Task[];
   loadTasks: () => Promise<void>;
   addTask: (task: Task) => Promise<void>;
-  updateTask: (id: number, task: Task) => Promise<void>;
-  deleteTask: (id: number) => Promise<void>;
+  updateTask: (id: string | number, task: Task) => Promise<void>;
+  deleteTask: (id: string | number) => Promise<void>;
   isLoading: boolean;
   userEmail: string;
 }
@@ -25,7 +25,6 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Obtener usuario al montar el componente
   useEffect(() => {
     const fetchUser = async () => {
       console.log("🔐 Obteniendo usuario actual...");
@@ -41,7 +40,6 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
     fetchUser();
   }, []);
 
-  // useCallback para evitar recrear la función en cada render
   const loadTasks = useCallback(async () => {
     if (!email) {
       console.warn("⚠️ No se puede cargar tareas sin email");
@@ -54,6 +52,7 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const data = await TaskAPI.getTasks(email);
       console.log(`✅ ${data.length} tareas cargadas`);
+      console.log('📋 IDs de tareas:', data.map(t => ({ id: t.id, type: typeof t.id })));
       setTasks(data);
     } catch (error) {
       console.error("❌ Error al cargar tareas:", error);
@@ -61,9 +60,8 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [email]); // Solo se recrea cuando cambia el email
+  }, [email]);
 
-  // Cargar tareas cuando el email esté disponible
   useEffect(() => {
     if (email) {
       loadTasks();
@@ -87,8 +85,9 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
-  async function updateTask(id: number, task: Task) {
+  async function updateTask(id: string | number, task: Task) {
     try {
+      console.log('🔄 Context: Actualizando tarea con ID:', id, 'tipo:', typeof id);
       const updated = await TaskAPI.updateTask(id, task);
       setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
       console.log("✅ Tarea actualizada en el estado local");
@@ -98,7 +97,7 @@ export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
-  async function deleteTask(id: number) {
+  async function deleteTask(id: string | number) {
     try {
       await TaskAPI.deleteTask(id);
       setTasks((prev) => prev.filter((t) => t.id !== id));

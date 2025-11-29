@@ -38,12 +38,6 @@ export default function HomeLayout() {
         }}
       />
       <Tabs.Screen
-        name="tasks/edit/[id]"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
         name="edit/[id]"
         options={{
           href: null,
