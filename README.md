@@ -44,4 +44,7 @@ GitHub: [Ricky200i8](https://github.com/Ricky200i8)
 
 Si te sirvió o te gustó, dale una ⭐ al rep
 
-<img src="assets/videos/Demostracion.mp4" width="250" /> <img src="screenshots/dashboard.png" width="250" />
+https://github.com/user-attachments/assets/665cc342-c31b-4b19-b096-ab2d5092a251
+
+
+
